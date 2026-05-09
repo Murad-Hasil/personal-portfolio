@@ -220,7 +220,7 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
             className="text-sm"
             style={{ fontFamily: "var(--font-jetbrains-mono)", color: "var(--accent-cyan)" }}
           >
-            // Admin Access
+            {"// Admin Access"}
           </p>
         </div>
 
@@ -323,7 +323,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
               className="text-xs"
               style={{ fontFamily: "var(--font-jetbrains-mono)", color: "var(--accent-cyan)" }}
             >
-              // Analytics Dashboard
+              {"// Analytics Dashboard"}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -454,16 +454,19 @@ export default function AdminPage() {
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(TOKEN_KEY);
-    if (!stored) { setView("login"); return; }
-    // Verify stored token is still valid
-    fetch("/api/admin/analytics", {
-      headers: { Authorization: `Bearer ${stored}` },
-      cache: "no-store",
-    }).then((r) => {
-      if (r.ok) { setToken(stored); setView("dashboard"); }
-      else { sessionStorage.removeItem(TOKEN_KEY); setView("login"); }
-    }).catch(() => { setView("login"); });
+    async function init() {
+      const stored = sessionStorage.getItem(TOKEN_KEY);
+      if (!stored) { setView("login"); return; }
+      try {
+        const r = await fetch("/api/admin/analytics", {
+          headers: { Authorization: `Bearer ${stored}` },
+          cache: "no-store",
+        });
+        if (r.ok) { setToken(stored); setView("dashboard"); }
+        else { sessionStorage.removeItem(TOKEN_KEY); setView("login"); }
+      } catch { setView("login"); }
+    }
+    void init();
   }, []);
 
   function handleLogin(t: string) {
