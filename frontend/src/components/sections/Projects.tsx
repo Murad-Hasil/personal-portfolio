@@ -148,8 +148,8 @@ export function Projects({ initialProjects }: ProjectsProps) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Show More */}
-        {hasMore && (
+        {/* Show More / Show Less */}
+        {(hasMore || visibleCount > INITIAL_VISIBLE) && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -157,7 +157,16 @@ export function Projects({ initialProjects }: ProjectsProps) {
             className="flex justify-center mt-10"
           >
             <button
-              onClick={() => setVisibleCount((c) => c + 4)}
+              onClick={() => {
+                if (hasMore) {
+                  setVisibleCount((c) => c + 4);
+                } else {
+                  setVisibleCount(INITIAL_VISIBLE);
+                  document
+                    .getElementById("projects")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
               className="px-6 py-2.5 rounded text-sm font-medium transition-all duration-200"
               style={{
                 fontFamily: "var(--font-space-grotesk)",
@@ -174,7 +183,9 @@ export function Projects({ initialProjects }: ProjectsProps) {
                   "transparent";
               }}
             >
-              Show More ({filtered.length - visibleCount} remaining)
+              {hasMore
+                ? `Show More (${filtered.length - visibleCount} remaining)`
+                : "Show Less"}
             </button>
           </motion.div>
         )}
