@@ -11,11 +11,11 @@
 | **Primary Tool** | Claude Code CLI |
 | **Author** | Murad Hasil |
 | **Target** | International Freelancing (Upwork / Fiverr) |
-| **Status** | Version 2.0 — **IN PROGRESS** (analytics dashboard) |
+| **Status** | Version 2.1 — **SHIPPED** (analytics dashboard + pageview tracking) |
 | **Live Frontend** | https://murad-hasil-portfolio-v2-xi.vercel.app |
 | **Live Backend** | https://mb-murad-portfolio-v2.hf.space |
 | **Development Environment** | WSL Ubuntu (required — see Phase 0) |
-| **Last Updated** | 2026-04-24 |
+| **Last Updated** | 2026-05-09 |
 
 ---
 
@@ -1482,7 +1482,8 @@ The portfolio itself demonstrates competency:
 | 1.8 | 2026-04-23 | **SHIPPED** — Portfolio copy conversion (008): Services cards redesigned (description + outcome format), About stats replaced with 4 outcome phrases, About bio para 3 rewritten to client-friendly voice. Spec: `specs/008-portfolio-copy-conversion/`. |
 | 1.9 | 2026-04-24 | **SHIPPED** — Services & CTA update (009): Hero primary CTA → WhatsApp, Fiverr CTA block added to Contact left panel, Fiverr link added to Footer, Services full card redesign (new names + descriptions + outcomes), RAG context files synced. Spec: `specs/009-services-cta-update/`. |
 | 1.9.1 | 2026-05-09 | **SHIPPED** — Morent car rental project added (5th project): case study, 5 screenshots, RAG re-embedded (23 vectors). Show More button on projects grid (4 initial + 4/click). About stat updated 4→5 projects. |
-| 2.0 | 2026-05-09 | **IN PROGRESS** — Analytics Dashboard (011): password-protected /admin page, GET /analytics/summary backend endpoint, daily chart, top pages + referrers. Spec: `specs/011-analytics-dashboard/`. |
+| 2.0 | 2026-05-09 | **SHIPPED** — Analytics Dashboard (011): password-protected /admin page, GET /analytics/summary backend endpoint (Bearer auth), daily bar chart, top pages + referrers tables. ADMIN_PASSWORD + ADMIN_SECRET env vars set in Vercel Production + HF Spaces. ESLint errors fixed in admin/page.tsx (JSX comment text nodes, synchronous setState in effect) that were blocking CI/CD and preventing backend deploy. Spec: `specs/011-analytics-dashboard/`. |
+| 2.1 | 2026-05-09 | **SHIPPED** — Pageview tracking (end-to-end): `PageViewTracker` client component fires `POST /api/analytics/pageview` on every route change via `usePathname`. Next.js server-side proxy route `/api/analytics/pageview` hides `BACKEND_URL` from browser. Skips `/admin` page. Fire-and-forget (never blocks UI). Wired into root layout. Dashboard now shows real visitor data. |
 
 ---
 
@@ -1542,6 +1543,8 @@ The portfolio itself demonstrates competency:
 |----------|----------|-------------|
 | `BACKEND_URL` | ✅ | `https://mb-murad-portfolio-v2.hf.space` |
 | `NEXT_PUBLIC_SITE_URL` | ✅ | Public site URL for OG tags |
+| `ADMIN_PASSWORD` | ✅ | Password for `/admin` dashboard login (server-side only) |
+| `ADMIN_SECRET` | ✅ | Shared Bearer token for `/analytics/summary` auth — must match HF Spaces value |
 
 ### Removed (no longer used)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` — removed when migrating to Resend
@@ -1559,6 +1562,9 @@ The portfolio itself demonstrates competency:
 | Backend not updating after push | Pushed to GitHub only | Run `git subtree push --prefix=backend hf main` |
 | Rate limited during local testing | 3/hour on contact, 20/hour on chat | Restart backend to reset in-memory rate limits |
 | `/resume.pdf` returns 404 | File not uploaded | Add PDF to `frontend/public/resume.pdf` |
+| Analytics dashboard shows 0 views always | `PageViewTracker` not in layout or backend never deployed | Verify `<PageViewTracker />` is in `layout.tsx`; check HF Space has latest backend (CI/CD must pass) |
+| `/admin` login fails with 503 | `ADMIN_PASSWORD` or `ADMIN_SECRET` missing/empty in Vercel Production | Re-add both vars in Vercel → Production env (not Preview) with correct values |
+| Analytics dashboard 404 after login | ESLint errors blocked CI/CD → backend never deployed new `GET /analytics/summary` | Fix lint errors, push, wait for CI/CD to complete and HF Space to restart |
 
 ---
 
@@ -1863,7 +1869,7 @@ Layout (1200×630):
 
 ## 24. Phase 11 — Analytics Dashboard
 
-**Status**: In Progress (v2.0) | **Spec**: `specs/011-analytics-dashboard/`  
+**Status**: ✅ SHIPPED (v2.1, 2026-05-09) | **Spec**: `specs/011-analytics-dashboard/`  
 **Estimated Time**: 4–6 hours  
 
 ### Background
@@ -1912,16 +1918,22 @@ Browser /admin
 
 ### Deliverables Checklist
 
-- [ ] `backend/app/routers/analytics.py` — `GET /analytics/summary` added + ADMIN_SECRET auth
-- [ ] `backend/.env.example` — `ADMIN_SECRET` documented
-- [ ] `frontend/src/app/api/admin/verify/route.ts` — password gate (server-side)
-- [ ] `frontend/src/app/api/admin/analytics/route.ts` — analytics proxy
-- [ ] `frontend/src/app/admin/page.tsx` — login form + full dashboard
-- [ ] ADMIN_PASSWORD set in Vercel env
-- [ ] ADMIN_SECRET set in Vercel env + HF Spaces env
-- [ ] Playwright MCP verification at desktop + mobile
-- [ ] Wrong password → 401, no data leaked
-- [ ] Correct password → dashboard with real DB data
+- [x] `backend/app/routers/analytics.py` — `GET /analytics/summary` added + ADMIN_SECRET auth
+- [x] `backend/.env.example` — `ADMIN_SECRET` documented
+- [x] `frontend/src/app/api/admin/verify/route.ts` — password gate (server-side)
+- [x] `frontend/src/app/api/admin/analytics/route.ts` — analytics proxy
+- [x] `frontend/src/app/admin/page.tsx` — login form + full dashboard
+- [x] ESLint errors fixed in `admin/page.tsx` (JSX `//` text nodes → string literals; synchronous setState in useEffect → async `init()`)
+- [x] ADMIN_PASSWORD set in Vercel Production env
+- [x] ADMIN_SECRET set in Vercel Production env + HF Spaces env
+- [x] CI/CD unblocked — Lint + Test + Deploy Backend all green
+- [x] Playwright MCP verification at desktop — login works, dashboard renders
+- [x] Wrong password → 401, no data leaked
+- [x] Correct password → dashboard with real DB data
+- [x] `frontend/src/app/api/analytics/pageview/route.ts` — Next.js proxy (hides BACKEND_URL)
+- [x] `frontend/src/components/PageViewTracker.tsx` — client component, fires on every route change, skips `/admin`
+- [x] `frontend/src/app/layout.tsx` — `<PageViewTracker />` wired into root layout
+- [x] End-to-end verified: visited `/` and `/projects/crm-fte` → dashboard showed 2 views with correct page breakdown
 
 ---
 
