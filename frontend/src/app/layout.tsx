@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -125,7 +126,10 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <PageViewTracker />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
