@@ -10,7 +10,7 @@ const ease: Transition = { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] };
 
 /* ── Data sourced from context/murad-profile.md ───────────────────────────── */
 const stats = [
-  "4 AI systems deployed",
+  "5 projects deployed",
   "3 channels automated live",
   "45 automated tests written",
   "168 hrs/week autonomous runtime",

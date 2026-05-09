@@ -16,7 +16,7 @@ Since 2023, he has focused on building production-ready AI systems designed for 
 
 What makes his approach different is spec-driven execution. Before writing code, he defines requirements, workflows, edge cases, and system architecture clearly so every build is reliable, scalable, and structured for real-world deployment. The result: fewer surprises, less rework, and AI systems that genuinely save businesses time and money.
 
-He has completed 4 featured portfolio projects, each production-deployed with live infrastructure, test suites, and documented specs.
+He has completed 5 featured portfolio projects, each production-deployed with live infrastructure, test suites, and documented specs.
 
 ## Why Hire Murad?
 
@@ -26,7 +26,7 @@ He has completed 4 featured portfolio projects, each production-deployed with li
 
 ## Career Stats
 
-- **4 AI systems deployed** — all with live infrastructure, test suites, and documented specs
+- **5 projects deployed** — all with live infrastructure, test suites, and documented specs
 - **3 channels automated live** — Gmail (Google Pub/Sub), WhatsApp (Twilio), Web Form (Next.js + Vercel) running simultaneously in CRM Digital FTE
 - **45 automated tests written** — 18 guardrail, 21 channel formatter, 6 E2E pipeline tests (no live DB or LLM required)
 - **168 hrs/week autonomous runtime** — Personal AI Employee runs 24/7 with zero sick days and no downtime
