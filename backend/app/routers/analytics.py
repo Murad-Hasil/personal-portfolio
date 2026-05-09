@@ -1,4 +1,4 @@
-"""analytics.py — POST /analytics/pageview and GET /analytics/summary."""
+"""analytics.py — POST /analytics/pageview, GET /analytics/summary, GET /analytics/chats."""
 
 import os
 from datetime import datetime, timedelta, timezone
@@ -41,6 +41,25 @@ class AnalyticsSummary(BaseModel):
     top_pages: list[PageCount]
     top_referrers: list[ReferrerCount]
     views_by_day: list[DayCount]
+
+
+class ChatQuestion(BaseModel):
+    session_id: str
+    question: str
+    asked_at: datetime
+
+
+class ChatSession(BaseModel):
+    session_id: str
+    started_at: datetime
+    messages_count: int
+    questions: list[str]
+
+
+class ChatsSummary(BaseModel):
+    total_sessions: int
+    total_user_messages: int
+    recent_sessions: list[ChatSession]
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -159,4 +178,59 @@ def get_summary(request: Request) -> AnalyticsSummary:
         top_pages=top_pages,
         top_referrers=top_referrers,
         views_by_day=views_by_day,
+    )
+
+
+@router.get("/chats", response_model=ChatsSummary)
+def get_chats(request: Request) -> ChatsSummary:
+    """Return recent chat sessions with user questions. Requires Bearer auth."""
+    _check_admin(request)
+
+    from app.database import get_engine
+    from app.models import ChatMessage, ChatSession as ChatSessionModel
+
+    try:
+        engine = get_engine()
+    except RuntimeError:
+        raise HTTPException(status_code=503, detail="Database unavailable.")
+
+    with Session(engine) as db:
+        total_sessions: int = db.exec(
+            select(func.count()).select_from(ChatSessionModel)
+        ).one()
+
+        total_user_messages: int = db.exec(
+            select(func.count()).select_from(ChatMessage).where(
+                ChatMessage.role == "user"
+            )
+        ).one()
+
+        # Last 20 sessions ordered by most recent
+        recent_session_rows = db.exec(
+            select(ChatSessionModel)
+            .order_by(ChatSessionModel.created_at.desc())  # type: ignore[union-attr]
+            .limit(20)
+        ).all()
+
+        recent_sessions: list[ChatSession] = []
+        for s in recent_session_rows:
+            msgs = db.exec(
+                select(ChatMessage)
+                .where(ChatMessage.session_id == s.session_id)
+                .order_by(ChatMessage.created_at.asc())  # type: ignore[union-attr]
+            ).all()
+            questions = [m.content for m in msgs if m.role == "user"]
+            recent_sessions.append(
+                ChatSession(
+                    session_id=s.session_id,
+                    started_at=s.created_at,
+                    messages_count=len(msgs),
+                    questions=questions,
+                )
+            )
+
+    return ChatsSummary(
+        total_sessions=total_sessions,
+        total_user_messages=total_user_messages,
+        recent_sessions=recent_sessions,
     )
