@@ -74,7 +74,56 @@ customers, customer_identifiers (cross-channel matching by email/phone/whatsapp)
 
 ---
 
-## Project 2: Todo App → Cloud-Native AI Agent (Spec-Driven Evolution)
+## Project 2: Morent — Production-Ready Car Rental Platform
+
+**Category**: AI / Frontend | **Status**: Completed | **Featured**: Yes
+
+**Live Demo**: https://morent-olive.vercel.app
+**GitHub**: https://github.com/Murad-Hasil/morent
+
+### What It Does
+A pixel-perfect, production-ready car rental web application built from a Figma design template. 8 fully functional pages: Home (hero banners, search, popular & recommendation cars), Browse Cars (filter sidebar, search, 3-column grid), Car Detail (gallery, specs, reviews, related cars), 4-step Checkout (form validation, promo codes, live pricing), Favorites, Settings, Admin Dashboard, and custom 404. Full dark mode, PWA installable on mobile/desktop, Playwright E2E tests, and CI/CD.
+
+### The Problem Solved
+Figma design templates demonstrate visual polish but rarely translate to production-quality code — most implementations skip accessibility, skip testing, and cut corners on state management. Building a portfolio-grade frontend means matching pixel-for-pixel fidelity while hitting senior developer expectations: TypeScript strict mode, form validation, keyboard navigation, and a full CI/CD pipeline.
+
+### How It Was Built
+Built across 12 progressive phases: Phase 1 added CSS animations (page transitions, card hover effects, staggered reveals) without Framer Motion — pure Tailwind globals. Phase 2 implemented dark mode with a custom ThemeProvider that reads localStorage before first paint, eliminating white flash on reload. Phase 3 added React Hook Form + Zod validation for the 4-step checkout. Phase 4 wired Zustand for favorites persistence (localStorage-synced). Phase 5 built a custom lightweight toast system without third-party libraries. Phase 6 made the filter sidebar functional (type, capacity, max daily price). Phases 7–9 covered SEO (per-page metadata, JSON-LD, OG images), PWA (manifest + service worker), and accessibility (ARIA labels, keyboard navigation). Phase 10 added Playwright E2E tests on desktop + mobile-chrome. Phases 11–12 set up GitHub Actions CI/CD and final polish.
+
+### Pages & Routes
+- `/` — Home: Hero banners with Pick-Up/Drop-Off search form, Popular Cars grid, Recommendation Cars grid
+- `/cars` — Browse: Filter sidebar (type, capacity, price), search query via URL param, 3-column car grid
+- `/cars/detail?id=N` — Car Detail: Image gallery, full specs, star reviews, JSON-LD structured data
+- `/checkout?id=N` — 4-step form: Billing Info → Rental Info → Payment → Confirmation; car passed via URL param
+- `/favorites` — Saved cars from Zustand + localStorage; empty state with CTA
+- `/settings` — Profile editing, language selector, notification toggles — all persisted to localStorage
+- `/dashboard` — Rental stats, Top-5 donut chart (SVG), Recent transactions
+- `/*` — Custom branded 404 page
+
+### Technologies Used
+Next.js 16.2.4 (App Router), React 19, TypeScript 5 (strict), Tailwind CSS v4, Zustand 5 (favorites + notifications), React Hook Form 7 + Zod 4 (checkout validation), next/image + sharp, @ducanh2912/next-pwa (service worker + manifest), Playwright (E2E tests), GitHub Actions (CI: lint → type-check → build), Vercel (deployment + preview URLs)
+
+### Key Engineering Decisions
+- **Flash-free dark mode**: Custom ThemeProvider reads localStorage before first paint and applies class to `<html>` in the server layout. No white flash even on hard reload.
+- **Zustand hydration safety**: Custom storage adapter syncs to localStorage without triggering Next.js App Router hydration mismatches (common pain point with SSR + client stores).
+- **Custom toast system**: Built without react-hot-toast or Sonner. Pure CSS animation + singleton event emitter so any component can trigger toasts without prop drilling.
+- **next/image priority heuristic**: priority={true} set only on the first 6 SSR-rendered car cards. Client-paginated cards excluded to avoid false LCP signals.
+- **APP_SECRET proxy guard**: All internal API routes validated against APP_SECRET env var via Next.js 16 proxy.ts — prevents direct endpoint enumeration.
+- **Zero animation library**: All transitions (page fade, card slide-up, staggered list) built with Tailwind CSS globals. No Framer Motion or GSAP runtime cost.
+
+### Measurable Outcomes
+- 8 fully implemented pages matching the Figma design pixel-for-pixel
+- PWA installable on mobile and desktop — Web App Manifest + workbox service worker, offline fallback at /offline
+- Playwright E2E suite — 7 test scenarios on chromium + mobile-chrome viewports
+- GitHub Actions CI/CD — lint → type-check → build on every push; Vercel auto-deploys on merge to main
+- Lighthouse-ready: semantic HTML, ARIA labels, alt text, focus-visible rings, keyboard navigation
+
+### What This Demonstrates
+This project demonstrates Murad's ability to translate a professional Figma design into production-quality frontend code — handling the details that separate junior implementations from senior-grade work: dark mode without flash, form validation with proper error UX, accessible interactive components, PWA capability, and a tested, deployed CI/CD pipeline. It proves frontend engineering depth alongside the AI/backend projects in his portfolio.
+
+---
+
+## Project 3: Todo App → Cloud-Native AI Agent (Spec-Driven Evolution)
 
 **Category**: Full-Stack + AI | **Status**: Completed | **Featured**: Yes
 

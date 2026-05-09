@@ -252,6 +252,66 @@
       ]
     },
     {
+      "id": "morent",
+      "title": "Morent — Production-Ready Car Rental Platform",
+      "slug": "morent",
+      "status": "completed",
+      "featured": true,
+      "category": "AI / Frontend",
+      "description": "Pixel-perfect implementation of the Morent Figma design — 8 fully functional pages with dark mode, CSS animations, Zustand state management, React Hook Form + Zod validation, PWA support, Playwright E2E tests, and CI/CD. Built with Next.js 16 App Router, React 19, TypeScript 5, and Tailwind CSS v4.",
+      "problem": "Figma design templates demonstrate visual polish but rarely translate to production-quality code — most implementations skip accessibility, skip testing, skip PWA capability, and cut corners on state management. Building a portfolio-grade frontend means matching pixel-for-pixel fidelity while also hitting senior developer expectations: TypeScript strict mode, form validation, keyboard navigation, and a full CI/CD pipeline.",
+      "solution": "Built the complete Morent car rental platform from the Figma source across 12 production phases: flash-free dark mode via custom ThemeProvider, Zustand for favorites + notifications persistence, React Hook Form + Zod for 4-step checkout validation, a lightweight custom toast system (no third-party library), functional filter sidebar (by type, capacity, and price), PWA manifest + service worker for mobile installation, per-page SEO metadata + JSON-LD structured data, and Playwright E2E tests on both desktop and mobile-chrome viewports — all wired to a GitHub Actions CI/CD pipeline.",
+      "tech": [
+        "Next.js 16.2.4",
+        "React 19",
+        "TypeScript 5",
+        "Tailwind CSS v4",
+        "Zustand 5",
+        "React Hook Form 7",
+        "Zod 4",
+        "next-pwa",
+        "Playwright",
+        "GitHub Actions",
+        "Vercel"
+      ],
+      "live_url": "https://morent-olive.vercel.app",
+      "github_url": "https://github.com/Murad-Hasil/morent",
+      "image": "/projects/morent-home.png",
+      "gallery": [
+        {
+          "src": "/projects/morent-cars-filter.png",
+          "caption": "Browse Cars — functional filter sidebar (type, capacity, max daily price) with real-time results and responsive 3-column car grid"
+        },
+        {
+          "src": "/projects/morent-car-detail.png",
+          "caption": "Car Detail — image gallery, full specs, star reviews, and related cars — JSON-LD structured data included for SEO"
+        },
+        {
+          "src": "/projects/morent-checkout.png",
+          "caption": "4-step Checkout — React Hook Form + Zod validation, promo code support, live price calculation, and rental summary sidebar"
+        },
+        {
+          "src": "/projects/morent-dashboard.png",
+          "caption": "Admin Dashboard — rental stats card, SVG donut chart (Top 5 cars by revenue), recent transactions, and dark mode sidebar toggle"
+        }
+      ],
+      "metrics": [
+        "8 fully implemented pages — Home, Browse Cars, Car Detail, Checkout, Favorites, Settings, Dashboard, custom 404",
+        "PWA installable — Web App Manifest + service worker (workbox) caches static assets; offline fallback page at /offline",
+        "Playwright E2E suite — 7 test scenarios covering navigation, filters, checkout, favorites, and dark mode on chromium + mobile-chrome",
+        "CI/CD pipeline — GitHub Actions (lint → type-check → build) + Vercel auto-deploy on push to main, preview deployments on PRs",
+        "Zero runtime animation library — all transitions built with Tailwind CSS globals; no Framer Motion or GSAP dependency"
+      ],
+      "highlights": [
+        "Flash-free dark mode — custom ThemeProvider reads localStorage before first paint and applies class to <html> in server layout; no white flash on reload",
+        "Zustand persistence — useFavorites and useNotifs stores use a custom storage adapter syncing to localStorage without triggering Next.js App Router hydration mismatches",
+        "Custom toast system — built without react-hot-toast; pure CSS animation + singleton event emitter pattern so any component triggers toasts without prop drilling",
+        "next/image priority heuristic — priority={true} on first 6 SSR-rendered car cards only; client-paginated cards excluded to avoid false LCP signals",
+        "APP_SECRET proxy guard — all internal API routes validated against a server-side APP_SECRET env var via Next.js 16 proxy.ts, preventing direct endpoint enumeration",
+        "SEO completeness — per-page metadata, OpenGraph image (1200×630 via opengraph-image.tsx), Twitter cards, robots.txt, sitemap.xml, and JSON-LD structured data on Car Detail"
+      ]
+    },
+    {
       "id": "physical-ai-textbook",
       "title": "Physical AI & Humanoid Robotics Textbook",
       "slug": "physical-ai-textbook",

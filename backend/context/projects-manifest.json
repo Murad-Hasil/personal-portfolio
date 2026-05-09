@@ -60,17 +60,17 @@
       "metrics": [
         "$75,000/year human FTE → <$1,000/year AI FTE — 98% cost reduction with true 24/7 uptime and zero sick days",
         "3 channels live end-to-end: Gmail (Google Pub/Sub push), WhatsApp (Twilio Sandbox), Web Form (Next.js + Vercel)",
-        "45-test suite — 18 guardrail tests, 21 channel formatter tests, 6 full E2E pipeline tests",
-        "Kafka decoupling: webhooks return in <200ms; AI processing happens async — Twilio and Gmail never timeout",
-        "Dual HPA: API pods 3→20, Worker pods 3→30 (70% CPU trigger) + idempotent Kafka producer (acks=all)"
+        "45-test suite — 18 guardrail tests, 21 channel formatter tests, 6 full E2E pipeline tests (no live DB or LLM required)",
+        "Kafka decoupling: webhooks return in <200ms; AI processing happens async — Twilio and Gmail never timeout waiting for LLM",
+        "Dual HPA: API pods 3→20, Worker pods 3→30 (70% CPU trigger) + idempotent Kafka producer (acks=all, zero duplicates)"
       ],
       "highlights": [
-        "Agent Maturity Model: Phase 1 (Incubation) built MCP server + agent skills using Claude Code; Phase 2 (Specialization) promoted to production @function_tool with Pydantic validation",
-        "Groq tool_use_failed fix — LLaMA 3.3 70B generated malformed XML tool calls; fixed with Literal types + 3-attempt retry with exponential backoff",
-        "Groq 429 handling — worker parses \"try again in Xm Ys\" from error message and sleeps the exact reset duration",
-        "Duplicate email prevention via contextvars — response_sent flag in ProcessingContext; agent calling send_response twice delivers only one email",
-        "asyncio.Queue fallback for HF Spaces — Kafka replaced at runtime (USE_LOCAL_QUEUE=true), same worker code, no Java needed",
-        "Cross-channel identity resolution — same customer on WhatsApp and Email unified via customer_identifiers table"
+        "Agent Maturity Model: Phase 1 (Incubation) built an MCP server with 5 tools + agent skills manifest using Claude Code as the Agent Factory; Phase 2 (Specialization) promoted the same tools to production @function_tool with Pydantic validation and error handling",
+        "Groq tool_use_failed fix — LLaMA 3.3 70B generated malformed XML tool calls; fixed with Literal types on all enum parameters and a 3-attempt retry loop with exponential backoff",
+        "Groq 429 rate-limit handling — instead of fixed backoff, the worker parses 'try again in Xm Ys' from the error message and sleeps the exact reset duration",
+        "Duplicate email prevention via contextvars — response_sent flag stored in ProcessingContext using Python contextvars; even if the agent calls send_response twice, only one email is delivered",
+        "asyncio.Queue fallback for Hugging Face Spaces — Kafka replaced by asyncio.Queue at runtime (USE_LOCAL_QUEUE=true), same worker code, no Java dependency in cloud",
+        "Cross-channel identity resolution — same customer on WhatsApp and Email recognized as one record via customer_identifiers table; full conversation history loaded across channels"
       ]
     },
     {
@@ -80,38 +80,76 @@
       "status": "completed",
       "featured": true,
       "category": "Full-Stack + AI",
-      "description": "5-phase evolution from a simple Python CLI todo list to a full cloud-native AI agent on Kubernetes. Demonstrates spec-driven development methodology from first principles to production.",
-      "problem": "Show a complete software evolution journey — from console CLI to AI-powered app to Kubernetes-deployed microservices.",
-      "solution": "5 progressive phases: CLI → Web App → AI Chatbot Interface → Local Kubernetes + HF Spaces with Kafka and Dapr.",
+      "description": "5-phase spec-driven evolution from a Python CLI to a full cloud-native AI agent on Kubernetes. Phase 3: OpenAI Agents SDK on Groq with 6 FastMCP tools via MCPServerStdio. Phase 5: Kubernetes on Minikube with Dapr Jobs for natural language reminders and Kafka event streaming.",
+      "problem": "Teams lose hours tracking tasks across disconnected tools. This production system takes plain-English input, creates and assigns tasks automatically, sends reminders, and runs on Kubernetes — built as a real-world tool and documented end-to-end.",
+      "solution": "5 progressive phases: CLI → Full-Stack Web App → AI Chatbot (Groq + MCP) → Local Kubernetes + Dapr Jobs + Kafka. Every phase has its own spec, plan, tasks, and PHR history.",
       "tech": [
-        "Python",
-        "Next.js",
+        "Python 3.12",
+        "Next.js 15",
         "FastAPI",
         "SQLModel",
         "Neon PostgreSQL",
         "OpenAI Agents SDK",
-        "MCP",
+        "FastMCP (MCPServerStdio)",
+        "Groq LLaMA 3.3 70B",
+        "Alembic",
         "Docker",
         "Minikube",
         "Kubernetes",
         "Kafka",
-        "Dapr"
+        "Dapr Jobs API",
+        "slowapi"
       ],
       "live_url": "https://murad-hasil-todo-ai.vercel.app",
       "github_url": "https://github.com/Murad-Hasil/Todo-AI-Assistant",
-      "image": "/projects/todo-cloud-ai.png",
+      "image": "/projects/todo-landing-page.png",
+      "gallery": [
+        {
+          "src": "/projects/todo-dashboard.png",
+          "caption": "Live dashboard — 7 tasks with priorities, tags, and due dates. Real data from Murad's account."
+        },
+        {
+          "src": "/projects/todo-ai-chat-add.png",
+          "caption": "Natural language task creation — 'Add a high priority task: finish the project report by Friday' — done instantly"
+        },
+        {
+          "src": "/projects/todo-search-filter.png",
+          "caption": "Search and filter — 'per' query surfaces Pay electricity bill and Call dentist with priority badges"
+        },
+        {
+          "src": "/projects/todo-ai-roman-urdu.png",
+          "caption": "Roman Urdu support — 'Electric bill wali task ko complete mark kar do' — AI responds in Roman Urdu"
+        },
+        {
+          "src": "/projects/todo-browser-notification.png",
+          "caption": "Real-time browser notification — OS-level push when a reminder task is due"
+        },
+        {
+          "src": "/projects/todo-api-swagger.png",
+          "caption": "Backend API v3.2.0 — tasks, chat, notifications, Dapr Jobs schedule, and full schema definitions"
+        },
+        {
+          "src": "/projects/todo-kubernetes-pods.png",
+          "caption": "Kubernetes pods running on Minikube: app, Dapr, Kafka, PostgreSQL all healthy"
+        },
+        {
+          "src": "/projects/todo-helm-deployment.png",
+          "caption": "Helm chart deployed — todoai revision 9, STATUS: deployed on default namespace"
+        }
+      ],
       "metrics": [
-        "5 complete evolution phases",
-        "Natural language task management",
-        "Local Kubernetes on Minikube; production backend on Hugging Face Spaces",
-        "Vercel auto-deploy on push to main; backend deployed via HF Space"
+        "5 complete evolution phases with individual spec, plan, tasks, and PHR records",
+        "6 FastMCP tools: add_task, list_tasks, complete_task, delete_task, update_task, schedule_reminder",
+        "Singleton MCPServerStdio pattern — avoids 20-second subprocess startup per chat request",
+        "Dapr Jobs API + dateparser: 'Remind me tomorrow at 9am' → Dapr one-shot job → browser notification"
       ],
       "highlights": [
-        "Spec-driven development throughout all phases",
-        "Natural language interface: 'Reschedule morning meetings to 2 PM'",
-        "Real-time browser notifications — in-app toast + OS push on reminder tasks, powered by DB polling",
-        "Dapr for service mesh abstraction",
-        "Kafka for event-driven architecture"
+        "6 FastMCP tools via MCPServerStdio singleton — agent calls CRUD tools through a persistent subprocess, not per-request spawning",
+        "Dapr Jobs API for reminder scheduling: dateparser converts natural language times to UTC → Dapr fires callback → DB polling delivers browser notification",
+        "Roman Urdu support — agent detects Roman Urdu input and responds in-kind (e.g. 'Electric bill wali task complete kar do')",
+        "parallel_tool_calls=False required for Groq llama-3.3-70b tool call stability, max_turns=5 per chat cycle",
+        "Kafka event streaming via publish_task_event() on every CRUD operation — decouples notification service",
+        "Alembic migrations for production schema evolution; slowapi rate limiting (chat: 10/min, tasks: 30/min)"
       ]
     },
     {
@@ -176,28 +214,24 @@
       ],
       "gallery": [
         {
-          "src": "/projects/personal-ai-employee-architecture.png",
-          "caption": "4-tier architecture overview: phases, orchestrator modules, and vault structure"
-        },
-        {
           "src": "/projects/personal-ai-employee-tests.png",
-          "caption": "13/13 unit tests passing — Brain routing, atomic claim, domain handoff, vault sync"
-        },
-        {
-          "src": "/projects/personal-ai-employee-vault-before.png",
-          "caption": "Needs_Action/ folder before task drop — clean slate, ready for autonomous processing"
+          "caption": "13/13 unit tests passing — Brain routing, atomic claim, domain handoff, vault sync all verified"
         },
         {
           "src": "/projects/personal-ai-employee-task-drop.png",
-          "caption": "Human drops email task with YAML front-matter — task_type, domain, priority fields"
+          "caption": "Email task dropped into vault — YAML front-matter with task_type, domain, and priority parsed instantly"
         },
         {
           "src": "/projects/personal-ai-employee-e2e-flow.png",
-          "caption": "Live E2E: agent startup (3/3 validation) → claimed → Groq API call → Pending_Approval in <2s"
+          "caption": "Live E2E log — agent startup → task claimed → Groq API triage → Pending_Approval in under 2 seconds"
         },
         {
           "src": "/projects/personal-ai-employee-ai-output.png",
-          "caption": "AI-generated triage result: TRIAGE: routine, DRAFT reply, signed 'Processed by AI Employee v0.1 — Verified by Human'"
+          "caption": "AI triage result — TRIAGE: routine, professional draft reply, signed 'Processed by AI Employee — Verified by Human'"
+        },
+        {
+          "src": "/projects/personal-ai-employee-linkedin-post.png",
+          "caption": "Published on LinkedIn — real-world post showcasing the system with 64 impressions and community engagement"
         }
       ],
       "metrics": [
@@ -218,15 +252,75 @@
       ]
     },
     {
+      "id": "morent",
+      "title": "Morent — Production-Ready Car Rental Platform",
+      "slug": "morent",
+      "status": "completed",
+      "featured": true,
+      "category": "AI / Frontend",
+      "description": "Pixel-perfect implementation of the Morent Figma design — 8 fully functional pages with dark mode, CSS animations, Zustand state management, React Hook Form + Zod validation, PWA support, Playwright E2E tests, and CI/CD. Built with Next.js 16 App Router, React 19, TypeScript 5, and Tailwind CSS v4.",
+      "problem": "Figma design templates demonstrate visual polish but rarely translate to production-quality code — most implementations skip accessibility, skip testing, skip PWA capability, and cut corners on state management. Building a portfolio-grade frontend means matching pixel-for-pixel fidelity while also hitting senior developer expectations: TypeScript strict mode, form validation, keyboard navigation, and a full CI/CD pipeline.",
+      "solution": "Built the complete Morent car rental platform from the Figma source across 12 production phases: flash-free dark mode via custom ThemeProvider, Zustand for favorites + notifications persistence, React Hook Form + Zod for 4-step checkout validation, a lightweight custom toast system (no third-party library), functional filter sidebar (by type, capacity, and price), PWA manifest + service worker for mobile installation, per-page SEO metadata + JSON-LD structured data, and Playwright E2E tests on both desktop and mobile-chrome viewports — all wired to a GitHub Actions CI/CD pipeline.",
+      "tech": [
+        "Next.js 16.2.4",
+        "React 19",
+        "TypeScript 5",
+        "Tailwind CSS v4",
+        "Zustand 5",
+        "React Hook Form 7",
+        "Zod 4",
+        "next-pwa",
+        "Playwright",
+        "GitHub Actions",
+        "Vercel"
+      ],
+      "live_url": "https://morent-olive.vercel.app",
+      "github_url": "https://github.com/Murad-Hasil/morent",
+      "image": "/projects/morent-home.png",
+      "gallery": [
+        {
+          "src": "/projects/morent-cars-filter.png",
+          "caption": "Browse Cars — functional filter sidebar (type, capacity, max daily price) with real-time results and responsive 3-column car grid"
+        },
+        {
+          "src": "/projects/morent-car-detail.png",
+          "caption": "Car Detail — image gallery, full specs, star reviews, and related cars — JSON-LD structured data included for SEO"
+        },
+        {
+          "src": "/projects/morent-checkout.png",
+          "caption": "4-step Checkout — React Hook Form + Zod validation, promo code support, live price calculation, and rental summary sidebar"
+        },
+        {
+          "src": "/projects/morent-dashboard.png",
+          "caption": "Admin Dashboard — rental stats card, SVG donut chart (Top 5 cars by revenue), recent transactions, and dark mode sidebar toggle"
+        }
+      ],
+      "metrics": [
+        "8 fully implemented pages — Home, Browse Cars, Car Detail, Checkout, Favorites, Settings, Dashboard, custom 404",
+        "PWA installable — Web App Manifest + service worker (workbox) caches static assets; offline fallback page at /offline",
+        "Playwright E2E suite — 7 test scenarios covering navigation, filters, checkout, favorites, and dark mode on chromium + mobile-chrome",
+        "CI/CD pipeline — GitHub Actions (lint → type-check → build) + Vercel auto-deploy on push to main, preview deployments on PRs",
+        "Zero runtime animation library — all transitions built with Tailwind CSS globals; no Framer Motion or GSAP dependency"
+      ],
+      "highlights": [
+        "Flash-free dark mode — custom ThemeProvider reads localStorage before first paint and applies class to <html> in server layout; no white flash on reload",
+        "Zustand persistence — useFavorites and useNotifs stores use a custom storage adapter syncing to localStorage without triggering Next.js App Router hydration mismatches",
+        "Custom toast system — built without react-hot-toast; pure CSS animation + singleton event emitter pattern so any component triggers toasts without prop drilling",
+        "next/image priority heuristic — priority={true} on first 6 SSR-rendered car cards only; client-paginated cards excluded to avoid false LCP signals",
+        "APP_SECRET proxy guard — all internal API routes validated against a server-side APP_SECRET env var via Next.js 16 proxy.ts, preventing direct endpoint enumeration",
+        "SEO completeness — per-page metadata, OpenGraph image (1200×630 via opengraph-image.tsx), Twitter cards, robots.txt, sitemap.xml, and JSON-LD structured data on Car Detail"
+      ]
+    },
+    {
       "id": "physical-ai-textbook",
       "title": "Physical AI & Humanoid Robotics Textbook",
       "slug": "physical-ai-textbook",
       "status": "completed",
       "featured": true,
       "category": "Full-Stack + AI",
-      "description": "Panaversity Hackathon I submission: a production-grade AI-native textbook platform teaching Physical AI and Humanoid Robotics across 13 weeks. Covers ROS 2, Gazebo, NVIDIA Isaac Sim, and a Conversational Humanoid capstone. Built with Docusaurus v3, FastAPI, Neon PostgreSQL, Qdrant Cloud, LangChain, and Groq LLaMA 3.3 70B.",
-      "problem": "Physical AI — AI systems that operate in the real physical world — is the next frontier after LLMs, yet no structured, accessible textbook exists for it. Existing robotics courses are scattered across dozens of resources, assume identical hardware for every learner, and offer zero in-context AI help when a student gets stuck. The challenge is compounded by three simultaneously heavy computational domains: Physics Simulation (Isaac Sim / Gazebo), Visual Perception (SLAM / Computer Vision), and Generative AI (LLMs). A student with an RTX 4080 workstation and one with a Jetson Orin Nano edge kit need entirely different guidance — but every existing resource gives them the same content. Pakistani learners face an additional barrier: dense English-only material with no mechanism to get real-time clarification in their native language.",
-      "solution": "A full-stack AI-native textbook platform with four progressive modules: (1) ROS 2 — the Robotic Nervous System, covering nodes, topics, services, URDF, and Python-ROS controllers; (2) Gazebo & Unity — physics simulation with LiDAR, depth cameras, and IMUs; (3) NVIDIA Isaac — photorealistic sim, Isaac ROS, hardware-accelerated VSLAM, Nav2 path planning, and sim-to-real RL; (4) Conversational Humanoid capstone — integrating LLMs for natural language robot interaction. Platform features: RAG chatbot built with LangChain + Qdrant + Groq LLaMA 3.3 70B with FastEmbed (any highlighted text → Ask AI instantly); hardware-aware personalization at signup across 3 rig profiles (RTX Sim Workstation / Jetson Edge Kit / Unitree G1 Robot); one-click Roman Urdu chapter translation; JWT auth with 3-step hardware onboarding; admin dashboard for curriculum ingestion and Qdrant reindexing.",
+      "description": "Panaversity Hackathon I submission: a production-grade AI-native textbook platform teaching Physical AI and Humanoid Robotics across 13 weeks. Covers ROS 2, Gazebo, NVIDIA Isaac Sim, and a Conversational Humanoid capstone. Backend deployed on Hugging Face Spaces; FastAPI + SQLAlchemy + Qdrant Cloud with BAAI/bge-small-en-v1.5 FastEmbed for RAG; Groq LLaMA 3.3 70B for answers.",
+      "problem": "Online robotics courses assume identical hardware for every learner and offer no help when students get stuck mid-lesson. This platform adapts content to each student’s hardware setup and answers questions in real time — deployed on live cloud infrastructure.",
+      "solution": "A full-stack AI-native textbook platform with four progressive modules: (1) ROS 2 — nodes, topics, services, URDF, Python-ROS controllers; (2) Gazebo & Unity — physics simulation with LiDAR, depth cameras, IMUs; (3) NVIDIA Isaac — photorealistic sim, Isaac ROS, hardware-accelerated VSLAM, Nav2 path planning, sim-to-real RL; (4) Conversational Humanoid capstone — LLM-powered natural language robot interaction. Platform features: RAG chatbot (Qdrant + FastEmbed BAAI/bge-small-en-v1.5 + Groq), hardware-aware personalization at signup across 3 rig profiles, one-click Roman Urdu chapter translation, JWT auth with 3-step hardware onboarding, admin dashboard with Qdrant reindexing.",
       "tech": [
         "Docusaurus v3",
         "React 19",
@@ -234,13 +328,11 @@
         "Tailwind CSS",
         "FastAPI",
         "Python 3.12",
-        "LangChain",
-        "Sentence Transformers",
-        "FastEmbed",
+        "FastEmbed (BAAI/bge-small-en-v1.5)",
         "Qdrant Cloud",
-        "Groq API (LLaMA 3.3 70B)",
-        "Neon PostgreSQL",
+        "Groq LLaMA 3.3 70B",
         "SQLAlchemy",
+        "Alembic",
         "PyJWT",
         "GitHub Actions",
         "GitHub Pages",
@@ -252,17 +344,48 @@
       "image": "/projects/physical-ai-textbook.png",
       "metrics": [
         "13-week curriculum across 4 modules (ROS 2 → Gazebo → Isaac → Conversational Humanoid)",
-        "180 vectors indexed in Qdrant Cloud for RAG across all 13 weeks",
-        "12-table Neon PostgreSQL schema (users, profiles, sessions, curriculum)",
-        "3 hardware profiles with fully personalized content paths",
+        "Qdrant Cloud collection 'physical-ai-docusaurus-textbook' — BAAI/bge-small-en-v1.5 384-dim vectors",
+        "9 SQLAlchemy models: User, StudentProfile, HardwareConfig, CurriculumProgress, ChatSession, ChatMessage, CurriculumWeek, IngestionLog, ReindexJob",
+        "3 hardware profiles with fully personalized content paths (RTX Sim Rig, Jetson Edge Kit, Unitree G1)",
         "All hackathon bonus deliverables completed: Auth + Personalization + Urdu Translation"
       ],
       "highlights": [
-        "RAG chatbot with LangChain + Qdrant: highlight any text → Ask AI for instant clarification",
+        "RAG pipeline: FastEmbed (BAAI/bge-small-en-v1.5) embeds queries → Qdrant cosine search → Groq LLaMA 3.3 70B generates answer — highlight any text → Ask AI",
+        "GrokClient auto-detects provider from API key prefix: gsk_ routes to Groq, xai- routes to xAI Grok — same code, zero config change",
         "Hardware-aware onboarding at signup: content adapts to RTX workstation, Jetson edge kit, or Unitree G1",
-        "One-click Roman Urdu translation for every chapter — built for Pakistani learners",
-        "Admin dashboard with curriculum ingestion pipeline and Qdrant reindexing",
-        "Full CI/CD: GitHub Actions auto-deploys to GitHub Pages on every push"
+        "One-click Roman Urdu translation for every chapter — translations API endpoint backed by Groq",
+        "Admin dashboard with curriculum ingestion pipeline and Qdrant reindexing endpoint",
+        "Full CI/CD: GitHub Actions auto-deploys Docusaurus to GitHub Pages; backend on HF Spaces"
+      ],
+      "gallery": [
+        {
+          "src": "/projects/physical-ai-rag-chatbot.png",
+          "caption": "RAG chatbot in action — highlight any text, click Ask AI, get an instant contextual answer from Groq LLaMA 3.3 70B"
+        },
+        {
+          "src": "/projects/physical-ai-signup-onboarding.png",
+          "caption": "3-step hardware onboarding — Account → Skill Level → Hardware rig selection at signup"
+        },
+        {
+          "src": "/projects/physical-ai-hardware-dashboard.png",
+          "caption": "Hardware Dashboard — personalized learning path configured per rig: Sim Rig, Jetson, or Unitree G1"
+        },
+        {
+          "src": "/projects/physical-ai-ros2-chapter.png",
+          "caption": "Live ROS 2 chapter — Python Node implementation with rclpy, actual code running on the platform"
+        },
+        {
+          "src": "/projects/physical-ai-roadmap.png",
+          "caption": "13-week curriculum roadmap with per-user progress tracking — 2/13 weeks completed, saves to PostgreSQL"
+        },
+        {
+          "src": "/projects/physical-ai-chapter-personalization.png",
+          "caption": "Chapter page with hardware-aware content — Sim Rig label active, Ask AI button inline with the text"
+        },
+        {
+          "src": "/projects/physical-ai-api-docs.png",
+          "caption": "Full backend API — Authentication, Student Profile, Chat, Admin, Personalization, Translations, Curriculum endpoints"
+        }
       ]
     }
   ]
