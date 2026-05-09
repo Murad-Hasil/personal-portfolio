@@ -51,13 +51,24 @@ interface ProjectsProps {
   initialProjects: Project[];
 }
 
+const INITIAL_VISIBLE = 4;
+
 export function Projects({ initialProjects }: ProjectsProps) {
   const [activeFilter, setActiveFilter] = useState<Filter>("All");
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
   const filtered =
     activeFilter === "All"
       ? initialProjects
       : initialProjects.filter((p) => p.category === activeFilter);
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  function handleFilterChange(f: Filter) {
+    setActiveFilter(f);
+    setVisibleCount(INITIAL_VISIBLE);
+  }
 
   return (
     <section id="projects" className="py-24 px-4 sm:px-6">
@@ -102,7 +113,7 @@ export function Projects({ initialProjects }: ProjectsProps) {
             <button
               suppressHydrationWarning
               key={f}
-              onClick={() => setActiveFilter(f)}
+              onClick={() => handleFilterChange(f)}
               className="px-4 py-1.5 rounded text-sm transition-all duration-200"
               style={{
                 fontFamily: "var(--font-space-grotesk)",
@@ -131,11 +142,42 @@ export function Projects({ initialProjects }: ProjectsProps) {
             animate="show"
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
-            {filtered.map((project) => (
+            {visible.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
           </motion.div>
         </AnimatePresence>
+
+        {/* Show More */}
+        {hasMore && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...ease, delay: 0.2 }}
+            className="flex justify-center mt-10"
+          >
+            <button
+              onClick={() => setVisibleCount((c) => c + 4)}
+              className="px-6 py-2.5 rounded text-sm font-medium transition-all duration-200"
+              style={{
+                fontFamily: "var(--font-space-grotesk)",
+                color: "var(--accent-cyan)",
+                border: "1px solid var(--accent-cyan)",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background =
+                  "rgba(0,212,255,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background =
+                  "transparent";
+              }}
+            >
+              Show More ({filtered.length - visibleCount} remaining)
+            </button>
+          </motion.div>
+        )}
       </div>
     </section>
   );
