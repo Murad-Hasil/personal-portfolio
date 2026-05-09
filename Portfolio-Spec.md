@@ -11,7 +11,7 @@
 | **Primary Tool** | Claude Code CLI |
 | **Author** | Murad Hasil |
 | **Target** | International Freelancing (Upwork / Fiverr) |
-| **Status** | Version 1.9 — **LIVE ✅** (services & CTA update complete) |
+| **Status** | Version 2.0 — **IN PROGRESS** (analytics dashboard) |
 | **Live Frontend** | https://murad-hasil-portfolio-v2-xi.vercel.app |
 | **Live Backend** | https://mb-murad-portfolio-v2.hf.space |
 | **Development Environment** | WSL Ubuntu (required — see Phase 0) |
@@ -1481,7 +1481,8 @@ The portfolio itself demonstrates competency:
 | 1.7 | 2026-04-21 | **SHIPPED** — Content copy update (007): hero subtext → human-centric value prop, About bio → 4 paragraphs (spec-driven narrative), 4th stat → 100% Self-Taught, OG/Twitter metadata + siteUrl fallback updated. Spec: `specs/007-content-copy-update/`. |
 | 1.8 | 2026-04-23 | **SHIPPED** — Portfolio copy conversion (008): Services cards redesigned (description + outcome format), About stats replaced with 4 outcome phrases, About bio para 3 rewritten to client-friendly voice. Spec: `specs/008-portfolio-copy-conversion/`. |
 | 1.9 | 2026-04-24 | **SHIPPED** — Services & CTA update (009): Hero primary CTA → WhatsApp, Fiverr CTA block added to Contact left panel, Fiverr link added to Footer, Services full card redesign (new names + descriptions + outcomes), RAG context files synced. Spec: `specs/009-services-cta-update/`. |
-| 2.0 | TBD | After 5+ freelance projects completed |
+| 1.9.1 | 2026-05-09 | **SHIPPED** — Morent car rental project added (5th project): case study, 5 screenshots, RAG re-embedded (23 vectors). Show More button on projects grid (4 initial + 4/click). About stat updated 4→5 projects. |
+| 2.0 | 2026-05-09 | **IN PROGRESS** — Analytics Dashboard (011): password-protected /admin page, GET /analytics/summary backend endpoint, daily chart, top pages + referrers. Spec: `specs/011-analytics-dashboard/`. |
 
 ---
 
@@ -1855,6 +1856,72 @@ Layout (1200×630):
 - [x] Per-project OG: crm-digital-fte ✅, todo-cloud-ai ✅
 
 **Status: ✅ SHIPPED 2026-04-02**
+
+---
+
+---
+
+## 24. Phase 11 — Analytics Dashboard
+
+**Status**: In Progress (v2.0) | **Spec**: `specs/011-analytics-dashboard/`  
+**Estimated Time**: 4–6 hours  
+
+### Background
+
+Page views are already tracked in Neon PostgreSQL (`page_views` table) via `POST /analytics/pageview`. There is no way to view this data. This phase adds a private `/admin` dashboard — password-protected, no third-party analytics, uses only existing infrastructure.
+
+### Architecture
+
+```
+Browser /admin
+    │
+    ├── Not authed → Login form
+    │       └── POST /api/admin/verify  ← compares vs ADMIN_PASSWORD (server-side)
+    │               └── returns { token } on success (token = ADMIN_SECRET)
+    │
+    └── Authed (token in sessionStorage)
+            └── GET /api/admin/analytics  ← proxies to FastAPI
+                    └── GET /analytics/summary (FastAPI, Bearer ADMIN_SECRET)
+                            └── aggregates page_views table
+```
+
+### New Environment Variables
+
+| Variable | Where | Description |
+|----------|-------|-------------|
+| `ADMIN_PASSWORD` | Vercel (server-side only) | Dashboard login password |
+| `ADMIN_SECRET` | Vercel + HF Spaces | Shared secret for backend auth |
+
+### FR-016 — Admin Login Gate
+- Route `/admin` shows password form before any data
+- Password validated server-side only — never exposed to browser
+- Token stored in `sessionStorage` (clears on tab close)
+
+### FR-017 — GET /analytics/summary (Backend)
+- New endpoint in `backend/app/routers/analytics.py`
+- Auth: `Authorization: Bearer <ADMIN_SECRET>`
+- Returns: `total_views`, `views_today`, `views_7d`, `views_30d`, `top_pages[10]`, `top_referrers[10]`, `views_by_day[30]`
+
+### FR-018 — Dashboard UI
+- 4 stat cards: Total / Today / 7 Days / 30 Days
+- Custom SVG bar chart: last 30 days daily views (no chart library)
+- Top Pages table (sorted by count)
+- Top Referrers table (`null` referrer shown as "Direct")
+- Refresh + Logout buttons
+- Mobile-responsive (2×2 card grid at 375px)
+
+### Deliverables Checklist
+
+- [ ] `backend/app/routers/analytics.py` — `GET /analytics/summary` added + ADMIN_SECRET auth
+- [ ] `backend/.env.example` — `ADMIN_SECRET` documented
+- [ ] `frontend/src/app/api/admin/verify/route.ts` — password gate (server-side)
+- [ ] `frontend/src/app/api/admin/analytics/route.ts` — analytics proxy
+- [ ] `frontend/src/app/admin/page.tsx` — login form + full dashboard
+- [ ] ADMIN_PASSWORD set in Vercel env
+- [ ] ADMIN_SECRET set in Vercel env + HF Spaces env
+- [ ] Playwright MCP verification at desktop + mobile
+- [ ] Wrong password → 401, no data leaked
+- [ ] Correct password → dashboard with real DB data
 
 ---
 
