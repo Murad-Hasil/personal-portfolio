@@ -101,7 +101,7 @@ export function About() {
               }}
             >
               <Image
-                src="/profile/murad.jpg"
+                src="/profile/murad.png"
                 alt="Murad Hasil"
                 fill
                 sizes="176px"
